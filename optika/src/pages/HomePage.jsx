@@ -1,6 +1,59 @@
 import { Link } from 'react-router-dom'
+import { articles } from '../data/articles'
+import { categories } from '../data/categories'
+import { featuredSlugs, recentCount } from '../data/home'
+import ArticleRow from '../components/knowledge/ArticleRow'
+
+// The main sections of the site, shown as shortcuts.
+const modules = [
+  {
+    number: '01',
+    title: 'Knowledge Base',
+    text: 'A growing encyclopedia of photography concepts, techniques and terminology.',
+    to: '/knowledge',
+    cta: 'Explore topics',
+  },
+  {
+    number: '02',
+    title: 'Camera Lab',
+    text: 'Discover camera anatomy and understand how each component works.',
+    to: '/camera-lab',
+    cta: 'Enter the lab',
+  },
+  {
+    number: '03',
+    title: 'Camera Archive',
+    text: 'Explore camera systems, specifications and photographic technology.',
+    to: '/archive',
+    cta: 'Browse archive',
+  },
+  {
+    number: '04',
+    title: 'Exposure Lab',
+    text: 'Interactive experiments for aperture, shutter speed, ISO and focal length.',
+    to: '/exposure-lab',
+    cta: 'Open experiments',
+  },
+]
 
 function HomePage() {
+  // Lookup table: 'optics' -> 'Optics'
+  const categoryNames = Object.fromEntries(
+    categories.map((item) => [item.id, item.name])
+  )
+
+  // Turn the featured slugs into real articles. filter(Boolean) drops
+  // any slug that does not exist, so a typo cannot crash the page.
+  const featured = featuredSlugs
+    .map((slug) => articles.find((item) => item.slug === slug))
+    .filter(Boolean)
+
+  // Newest first. [...articles] makes a copy, so the original list
+  // is not reordered. Dates are 'YYYY-MM-DD' text, which sorts correctly.
+  const recent = [...articles]
+    .sort((a, b) => b.dateAdded.localeCompare(a.dateAdded))
+    .slice(0, recentCount)
+
   return (
     <>
       <section className="hero">
@@ -57,36 +110,69 @@ function HomePage() {
         </p>
       </section>
 
-      <section className="features">
-        <article className="feature-card">
-          <span className="feature-number">01</span>
-          <h3>Knowledge Base</h3>
-          <p>
-            A growing encyclopedia of photography concepts,
-            techniques, and terminology.
-          </p>
-          <Link to="/knowledge">Explore topics ↗</Link>
-        </article>
+      {featured.length > 0 && (
+        <section className="home-section">
+          <div className="home-section-head">
+            <div>
+              <p className="eyebrow">FEATURED TOPICS</p>
+              <h2>Start with the fundamentals</h2>
+            </div>
+            <Link to="/knowledge" className="text-link">
+              All articles ↗
+            </Link>
+          </div>
 
-        <article className="feature-card">
-          <span className="feature-number">02</span>
-          <h3>Camera Lab</h3>
-          <p>
-            Discover camera anatomy and understand how each
-            component works.
-          </p>
-          <Link to="/camera-lab">Enter the lab ↗</Link>
-        </article>
+          <div className="article-rows">
+            {featured.map((article, index) => (
+              <ArticleRow
+                key={article.slug}
+                article={article}
+                categoryName={categoryNames[article.category]}
+                number={String(index + 1).padStart(2, '0')}
+              />
+            ))}
+          </div>
+        </section>
+      )}
 
-        <article className="feature-card">
-          <span className="feature-number">03</span>
-          <h3>Camera Archive</h3>
-          <p>
-            Explore camera systems, specifications, and
-            photographic technology.
-          </p>
-          <Link to="/archive">Browse archive ↗</Link>
-        </article>
+      <section className="home-section">
+        <div className="home-section-head">
+          <div>
+            <p className="eyebrow">RECENTLY ADDED</p>
+            <h2>New in the archive</h2>
+          </div>
+        </div>
+
+        <div className="article-rows">
+          {recent.map((article) => (
+            <ArticleRow
+              key={article.slug}
+              article={article}
+              categoryName={categoryNames[article.category]}
+              number={article.dateAdded}
+            />
+          ))}
+        </div>
+      </section>
+
+      <section className="home-section">
+        <div className="home-section-head">
+          <div>
+            <p className="eyebrow">MODULES</p>
+            <h2>Explore OPTIKA</h2>
+          </div>
+        </div>
+      </section>
+
+      <section className="features modules">
+        {modules.map((item) => (
+          <article className="feature-card" key={item.to}>
+            <span className="feature-number">{item.number}</span>
+            <h3>{item.title}</h3>
+            <p>{item.text}</p>
+            <Link to={item.to}>{item.cta} ↗</Link>
+          </article>
+        ))}
       </section>
     </>
   )
