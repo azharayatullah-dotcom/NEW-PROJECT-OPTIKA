@@ -1,32 +1,27 @@
 import { Canvas } from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei'
+import CameraModel from './CameraModel'
 
-// A temporary test object. Later this becomes the camera model.
-function TestBox() {
+function CameraScene({ selectedId, onSelect, explode }) {
   return (
-    <mesh>
-      <boxGeometry args={[2, 1.2, 1]} />
-      <meshStandardMaterial color="#65D5E8" roughness={0.5} metalness={0.2} />
-    </mesh>
-  )
-}
+    // The camera sits farther back now, so the exploded view fits.
+    <Canvas camera={{ position: [7, 4, 9], fov: 45 }}>
+      <ambientLight intensity={0.5} />
+      <hemisphereLight args={['#B6C9D5', '#101820', 0.5]} />
+      <directionalLight position={[5, 6, 4]} intensity={1.6} />
+      <directionalLight position={[-6, 3, -5]} intensity={0.6} />
 
-function CameraScene() {
-  return (
-    // Canvas fills its parent element, so the parent needs a set height.
-    <Canvas camera={{ position: [4, 2.5, 5], fov: 45 }}>
-      {/* Lights: soft light everywhere, plus a directional "sun" */}
-      <ambientLight intensity={0.6} />
-      <directionalLight position={[5, 6, 4]} intensity={1.8} />
+      <CameraModel
+        selectedId={selectedId}
+        onSelect={onSelect}
+        explode={explode}
+      />
 
-      <TestBox />
-
-      {/* Drag to rotate, scroll or pinch to zoom. Distance limits stop
-          the visitor from zooming inside the object or too far away. */}
       <OrbitControls
         enablePan={false}
+        target={[0, 0, 0.5]}
         minDistance={3}
-        maxDistance={12}
+        maxDistance={22}
         enableDamping
       />
     </Canvas>
